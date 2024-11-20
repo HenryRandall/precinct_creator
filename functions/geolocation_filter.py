@@ -65,8 +65,15 @@ def nearest_neighbor(left_gdf, right_gdf, k, return_dist=True):
   return closest_points
 
 def geolocation_filter(gdf, geolocated_error_thresh, stdev_from_mean, crs):
+  """
+  Removes points in the gdf, that are in clusters with lower counts than the geolocated_error_thresh multiplied by the number of entries in the gdf
+  These clusters must be considered outliers by their distance. Using stdev_from_mean as the maximum acceptable standard deviation away from the mean
+  crs is the crs that the dataframe should be output as.
+  """
+  # Format dataframe for input into k-nearest function
   gdf = gdf.reset_index()
   gdf = gdf.to_crs(crs="EPSG:4326")
+  # Create a k-value based on the size of the dataframe and the geolocated_error_threshold
   k = math.floor(len(gdf.index) * geolocated_error_thresh)+1 #Since k=1 finds distnace to self add 1 to counter act
   dist_gdf = nearest_neighbor(gdf,gdf,k)
   # add distance measure to old dataframe
