@@ -1,4 +1,4 @@
-from shapely.geometry import GeometryCollection, MultiPoint, Polygon, LineString, MultiPolygon
+from shapely.geometry import Point, MultiPoint, Polygon, LineString, MultiPolygon, GeometryCollection
 from shapely.ops import split
 
 def overlap_resolver(shape_1, shape_2):
@@ -64,3 +64,25 @@ def overlap_resolver(shape_1, shape_2):
         shape_2_new = shape_2_new.union(split_intersection)
 
   return shape_1_new, shape_2_new
+
+def shape_conditioner(poly):
+  """Removes lines and points from Geometric Collections and simplfies them into polygons or multipolygons"""
+  # loop through every geomerty
+  for i, geomcoll in poly.items():
+    # If a geometry collection, sort based on geometry
+    if isinstance(geomcoll, GeometryCollection):
+      shapes = []
+      for geom in geomcoll.geoms:
+        if isinstance(geom, (Point, LineString)):
+          continue
+        elif isinstance(geom, Polygon):
+          shapes.append(geom)
+        elif isinstance(geom, MultiPolygon):
+          for shape in geom.geoms:
+            shapes.append(shape)
+      # If only 1 shape make polygon, else multipolygon
+      if len(shapes) == 1:
+        poly[i] = shapes[0]
+      else:
+        poly[i] = MultiPolygon(shapes)
+  return poly

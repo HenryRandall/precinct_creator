@@ -71,7 +71,7 @@ def geolocation_filter(gdf, geolocated_error_thresh, stdev_from_mean, crs):
   crs is the crs that the dataframe should be output as.
   """
   # Format dataframe for input into k-nearest function
-  gdf = gdf.reset_index()
+  gdf = gdf.reset_index(drop=True)
   gdf = gdf.to_crs(crs="EPSG:4326")
   # Create a k-value based on the size of the dataframe and the geolocated_error_threshold
   k = math.floor(len(gdf.index) * geolocated_error_thresh)+1 #Since k=1 finds distnace to self add 1 to counter act
